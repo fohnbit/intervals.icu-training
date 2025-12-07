@@ -45,7 +45,7 @@ Beispiel:
 
 {
   "api_key": "DEIN_API_KEY",
-  "athlete_id": "i33675",
+  "athlete_id": "XXXXXX",
   "base_url": "https://intervals.icu/api/v1",
   "default_start_time": "17:00:00",
 
