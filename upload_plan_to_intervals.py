@@ -26,7 +26,14 @@ def auth():
 def load_plan_file(path: str):
     """
     Lädt einen einzelnen Plan aus einer JSON-Datei.
-    Erwartet eine Liste von Workouts oder ein Dict mit 'trainings'.
+    Erwartet:
+    - eine Liste von Workouts (unser aktuelles Format), ODER
+    - ein Dict mit 'trainings' (kompatibel zum GitHub-Beispiel).
+
+    Die Workouts selbst enthalten bereits:
+    - steps mit duration, zone, cadence, description
+    - optional intensity, ramp, ...
+    Diese Felder werden später 1:1 an Intervals.icu durchgereicht.
     """
     p = Path(path)
     if not p.exists():
@@ -56,7 +63,8 @@ def load_all_workouts() -> list[dict]:
         d = Path(PLAN_DIR)
         if not d.exists():
             raise FileNotFoundError(
-                f"Trainingsverzeichnis nicht gefunden: {PLAN_DIR}")
+                f"Trainingsverzeichnis nicht gefunden: {PLAN_DIR}"
+            )
 
         json_files = sorted(d.glob("*.json"))
         if not json_files:
@@ -77,7 +85,8 @@ def load_all_workouts() -> list[dict]:
         # Fallback: einzelnes Plan-File wie bisher
         if not PLAN_FILE:
             raise RuntimeError(
-                "Weder plan_dir noch plan_file in config.paths gesetzt.")
+                "Weder plan_dir noch plan_file in config.paths gesetzt."
+            )
         print(f"Lade Workouts aus Plan-Datei: {PLAN_FILE}")
         workouts = load_plan_file(PLAN_FILE)
 
@@ -97,7 +106,8 @@ def load_all_workouts() -> list[dict]:
             filtered.append(w)
 
     print(
-        f"Gefundene Workouts gesamt: {len(workouts)}, davon ab heute: {len(filtered)}")
+        f"Gefundene Workouts gesamt: {len(workouts)}, davon ab heute: {len(filtered)}"
+    )
     return filtered
 
 
@@ -167,10 +177,15 @@ def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
     Baut die description im gewünschten Stil:
 
     [PLAN-ID:...]
-    - 10m in Z2 85rpm
-    - 3m in Z5 95rpm
-    - 3m in SS 90-100rpm
-    - 10m in Z1 Free
+    - 15m ramp Z1 Free intensity=warmup
+    - 8m SS 90rpm intensity=active
+    - 5m Z1 Free intensity=recovery
+    ...
+
+    Regeln:
+    - kein "in" mehr
+    - "ramp" kommt direkt nach der Dauer, falls im Step gesetzt
+    - intensity wird als "intensity=<wert>" angehängt, falls vorhanden
     """
     lines: list[str] = []
 
@@ -182,21 +197,35 @@ def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
         dur = (step.get("duration") or "").strip()
         zone = (step.get("zone") or "").strip()
         cadence = (step.get("cadence") or "").strip()
+        intensity = (step.get("intensity") or "").strip()
+        ramp_flag = bool(step.get("ramp"))
 
-        if not dur or not zone:
+        if not dur:
             continue
 
-        # Basis: "- 3m in Z5"
-        line = f"- {dur} in {zone}"
+        # Basis: "- 15m"
+        line_parts = [f"- {dur}"]
 
-        # Kadenz anhängen – ohne Klammern, auch Bereiche wie "90-100rpm"
+        # ramp direkt nach der Zeit
+        if ramp_flag:
+            line_parts.append("ramp")
+
+        # Zone (SS, Z1, Z2, Z3, Z5, ...)
+        if zone:
+            line_parts.append(zone)
+
+        # Kadenz (inkl. Bereiche wie 90-100rpm oder "Free")
         if cadence:
-            line += f" {cadence}"
+            line_parts.append(cadence)
 
+        # intensity hinten anhängen
+        if intensity:
+            line_parts.append(f"intensity={intensity}")
+
+        line = " ".join(line_parts)
         lines.append(line)
 
     return "\n".join(lines).strip()
-
 
 def extract_plan_id_from_description(description: str | None) -> str | None:
     """
@@ -224,6 +253,7 @@ def build_event_payload(workout: dict) -> dict:
     WICHTIG:
     - Description im Format "- 10m in Z2 85rpm" aus steps
     - moving_time aus steps bzw. aus duration/moving_time im Plan
+    - steps werden 1:1 übernommen, inkl. intensity, ramp, etc.
     """
     date = workout["date"]
     start_date_local = f"{date}T{DEFAULT_START_TIME}"
@@ -242,7 +272,10 @@ def build_event_payload(workout: dict) -> dict:
     else:
         if "moving_time" in workout and workout["moving_time"] is not None:
             moving_time = int(workout["moving_time"])
-        elif "duration_minutes" in workout and workout["duration_minutes"] is not None:
+        elif (
+            "duration_minutes" in workout
+            and workout["duration_minutes"] is not None
+        ):
             moving_time = int(round(workout["duration_minutes"] * 60))
         else:
             moving_time = None
@@ -262,13 +295,16 @@ def build_event_payload(workout: dict) -> dict:
         "description": description,
         "type": map_sport_to_event_type(raw_sport),
         "moving_time": moving_time,
-        "steps": steps,  # optional – Intervals.icu ignoriert das ggf., aber schadet nicht
+        # Hier werden intensity / ramp etc. automatisch mitgeschickt
+        "steps": steps,
     }
 
     return payload
 
 
-def index_events_by_plan_id_from_description(events: list[dict]) -> dict[str, dict]:
+def index_events_by_plan_id_from_description(
+    events: list[dict],
+) -> dict[str, dict]:
     """
     Erstellt ein Dict: plan_id -> Event
     indem die PLAN-ID aus der description extrahiert wird.
@@ -297,7 +333,8 @@ def upsert_plan(plan: list[dict]):
     events_by_plan_id = index_events_by_plan_id_from_description(
         existing_events)
     print(
-        f"Gefundene Events mit PLAN-ID in description: {len(events_by_plan_id)}")
+        f"Gefundene Events mit PLAN-ID in description: {len(events_by_plan_id)}"
+    )
 
     new_events_payloads = []
     updated = 0
@@ -315,7 +352,8 @@ def upsert_plan(plan: list[dict]):
             resp = requests.put(url, auth=auth(), json=payload, timeout=30)
             if not resp.ok:
                 print(
-                    f"\n❌ Fehler beim Update von Event {event_id} (plan_id={plan_id})")
+                    f"\n❌ Fehler beim Update von Event {event_id} (plan_id={plan_id})"
+                )
                 print("Payload (PUT):")
                 print(json.dumps(payload, indent=2, ensure_ascii=False))
                 print("Status:", resp.status_code)
@@ -331,7 +369,8 @@ def upsert_plan(plan: list[dict]):
         url = f"{BASE_URL}/athlete/{ATHLETE_ID}/events/bulk"
         print(f"Sende {len(new_events_payloads)} neue Events an {url} ...")
         resp = requests.post(
-            url, auth=auth(), json=new_events_payloads, timeout=30)
+            url, auth=auth(), json=new_events_payloads, timeout=30
+        )
         if not resp.ok:
             print("\n❌ Fehler beim Erstellen neuer Events (bulk)")
             print("Payload (POST bulk):")
