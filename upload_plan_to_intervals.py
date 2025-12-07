@@ -115,7 +115,7 @@ def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
             continue
 
         # Basis: "- 3m in Z5"
-        line = f"- {dur} in {zone}"
+        line = f"- {dur} {zone}"
 
         # Kadenz einfach anhängen – ohne Klammern, auch Bereiche wie "90-100rpm"
         if cadence:
@@ -148,9 +148,6 @@ def extract_plan_id_from_description(description: str | None) -> str | None:
 def build_event_payload(workout: dict) -> dict:
     """
     Baut den Payload für ein Intervals.icu-Event aus einem Plan-Eintrag.
-    WICHTIG:
-    - Description im Format "- 10m in Z2 (85rpm)" aus steps
-    - moving_time aus steps (Sekunden)
     """
     date = workout["date"]
     start_date_local = f"{date}T{DEFAULT_START_TIME}"
@@ -167,15 +164,18 @@ def build_event_payload(workout: dict) -> dict:
             total_secs += convert_duration(dstr)
         moving_time = total_secs
     else:
-        # Fallback: duration_minutes, falls gesetzt
-        if "duration_minutes" in workout and workout["duration_minutes"] is not None:
+        if "moving_time" in workout and workout["moving_time"] is not None:
+            moving_time = int(workout["moving_time"])
+        elif "duration_minutes" in workout and workout["duration_minutes"] is not None:
             moving_time = int(round(workout["duration_minutes"] * 60))
         else:
             moving_time = None
 
     category = workout.get("category", "WORKOUT")
-    sport_type = workout["sport"]  # z.B. "Ride", "Run", "VirtualRow" etc.
     plan_id = workout["plan_id"]
+
+    # sport entweder aus 'sport' (alte Struktur) oder aus 'type' (neue v4 JSON)
+    raw_sport = workout.get("sport") or workout.get("type") or ""
 
     description = build_description_with_steps(plan_id, steps)
 
@@ -184,9 +184,9 @@ def build_event_payload(workout: dict) -> dict:
         "category": category,
         "name": workout["name"],
         "description": description,
-        "type": map_sport_to_event_type(workout["sport"]),
+        "type": map_sport_to_event_type(raw_sport),
         "moving_time": moving_time,
-        "steps": steps  # optional, im GitHub-Beispiel auch enthalten
+        "steps": steps,
     }
 
     return payload
