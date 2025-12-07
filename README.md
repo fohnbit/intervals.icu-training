@@ -1,260 +1,232 @@
-📘 README – Intervals.icu Trainingsplan Automatisierung
+🚀 Quick Start Guide – Intervals.icu Trainings-Upload System
 
-Dieses Projekt bietet ein vollständiges Framework, um Trainingspläne automatisch in Intervals.icu zu laden, zu aktualisieren und mit Coaching-Daten abzugleichen.
-
-Es besteht aus:
-	1.	Upload-System für Trainingspläne
-	2.	Automatischem Fetch der letzten Woche (Wellness + Aktivitäten)
-	3.	Eigenem Trainingsformat (.json), das beliebig erweitert werden kann
-	4.	Fehlerfreier Upsert-Logik
-	5.	Zonen- und Kadenzen-Parsing für Intervals.icu
-	6.	PLAN-ID Matching zur sicheren Aktualisierung
+Dieses Projekt ermöglicht es, Trainingspläne als JSON-Dateien automatisch in Intervals.icu hochzuladen, inklusive Struktur, Zonen, Kadenzen, Warmup/Ramp, Intensität usw.
+Es unterstützt zudem mehrere Trainingsdateien im Verzeichnis, automatisches Updaten existierender Events und ignoriert vergangene Workouts.
 
 ⸻
 
-🗂 Projektstruktur
+1️⃣ Repository klonen
 
-intervals.icu-training/
-│
-├── config.json
-├── upload_plan_to_intervals.py
-├── fetch_weekly_coach_data.py
-├── config_loader.py
-│
-└── trainings/
-    ├── februar_2026.json
-    ├── maerz_2026_intervals_plan_v2.json
-    └── weitere_pläne.json
-
-Alle Trainingspläne im Ordner trainings/ werden geladen.
-
-⸻
-
-⚙️ 1. Installation
-
-Python-Abhängigkeiten installieren
-
-pip3 install requests
+git clone <URL>
+cd intervals.icu-training
 
 
 ⸻
 
-🔑 2. config.json
+2️⃣ Python-Umgebung vorbereiten
+
+macOS
+
+pip3 install -r requirements.txt
+
+Windows / Linux
+
+pip install -r requirements.txt
+
+
+⸻
+
+3️⃣ config.json einrichten
+
+Öffne die Datei:
+
+config.json
+
+Hier müssen drei wichtige Dinge gesetzt werden:
+
+⸻
+
+🔐 API-Daten
+
+Trage deine Intervals.icu Benutzer-Daten ein:
+
+"api_key": "DEIN_INTERVALS_API_KEY",
+"athlete_id": "iDEINE_ID",
+"base_url": "https://intervals.icu/api/v1",
+
+👉 API-Key findest du in Intervals.icu
+→ Settings → API Key
+
+👉 athlete_id findest du in der URL, z. B.:
+https://intervals.icu/athlete/i33775 → i33775
+
+⸻
+
+📁 Trainingsdateien
+
+Ein Verzeichnis mit vielen Trainingsdateien verwenden
+
+Empfohlenes Setup:
+
+"paths": {
+    "plan_dir": "training_plans/"
+}
+
+Alle .json Trainingsdateien in training_plans/ werden automatisch geladen.
+
+⸻
+
+🕒 Startzeit für Workouts festlegen
+
+(default: 17:00 Uhr)
+
+"default_start_time": "17:00:00"
+
+
+⸻
+
+4️⃣ Trainings im JSON-Format anlegen
 
 Beispiel:
 
 {
-  "api_key": "DEIN_API_KEY",
-  "athlete_id": "XXXXXX",
-  "base_url": "https://intervals.icu/api/v1",
-  "default_start_time": "17:00:00",
-
-  "paths": {
-    "training_dir": "trainings"
-  }
+  "date": "2026-02-04",
+  "plan_id": "2026-02-04-SST-3x8",
+  "name": "Sweetspot 3×8min",
+  "sport": "Ride",
+  "category": "WORKOUT",
+  "steps": [
+    { "duration": "15m", "zone": "Z1", "cadence": "Free", "intensity": "warmup", "ramp": true },
+    { "duration": "8m",  "zone": "SS", "cadence": "90rpm", "intensity": "active" },
+    { "duration": "5m",  "zone": "Z1", "cadence": "Free", "intensity": "recovery" }
+  ]
 }
 
+💡 Alle Schritte werden automatisch in eine Intervals-kompatible Description umgewandelt:
 
-⸻
-
-🧠 3. Trainingsplan-Format
-
-Eine Trainingsdatei besteht aus einem Array von Workouts:
-
-[
-  {
-    "date": "2026-03-06",
-    "plan_id": "2026-03-06-VO2-5x3",
-    "name": "VO2max 5×3min",
-    "type": "Ride",
-    "moving_time": 4500,
-    "steps": [
-      { "duration": "15m", "zone": "Z1", "cadence": "Free", "description": "Aufwärmen" },
-      { "duration": "3m",  "zone": "Z5", "cadence": "95-100rpm", "description": "Intervall 1 VO2max" },
-      { "duration": "3m",  "zone": "Z1", "cadence": "Free", "description": "Pause 1 locker" }
-    ]
-  }
-]
-
-✔ Unterstützte Felder:
-
-Feld	Bedeutung
-date	ISO Datum
-plan_id	Eindeutige ID zur Wiedererkennung
-type	Ride, Strength, VirtualRow, Run
-moving_time	Dauer in Sekunden
-steps	Liste mit Intervall-Schritten
-zone	z. B. Z1, Z2, Z3, Z5, SS
-cadence	Zahl, Bereich („90-100rpm“), text („Free“)
-
-
-⸻
-
-🆙 4. Upload-System (Upsert)
-
-Das Script:
-
-→ lädt alle .json aus trainings/
-
-→ filtert alle Trainings ab heute
-
-→ lädt sie hoch oder aktualisiert sie
-
-(Matching über [PLAN-ID:xxxxxx] in der Beschreibung)
-
-⸻
-
-🧾 4.1 upload_plan_to_intervals.py
-
-Funktionen:
-	•	Liest ALLE Trainingspläne automatisch
-	•	Erkennt bestehende Events über PLAN-ID
-	•	Erstellt neue Events (bulk upload)
-	•	Aktualisiert vorhandene Events (PUT)
-	•	Schreibt Steps sauber in die Description:
-
-Beispiel:
-
-[PLAN-ID:2026-03-06-VO2-5x3]
-- 15m in Z1 Free
-- 3m in Z5 95-100rpm
-- 3m in Z1 Free
+[PLAN-ID:2026-02-04-SST-3x8]
+- 15m ramp Z1 Free intensity=warmup
+- 8m SS 90rpm intensity=active
+- 5m Z1 Free intensity=recovery
 ...
 
-Unterstützte Sportarten:
-
-Eingabe	Intervals-Typ
-Ride	Ride
-Strength / Kraft	WeightTraining
-VirtualRow	VirtualRow
-Lauf	Run
-
 
 ⸻
 
-🔍 5. Wellness + Aktivitäten abrufen
+5️⃣ Script zum Hochladen ausführen
 
-Die API liefert:
-	•	Training Load (CTL, ATL, RampRate)
+python3 upload_plan_to_intervals.py
+
+Das Script:
+	•	lädt alle Trainings ab heutigem Datum
+	•	gleicht anhand der PLAN-ID ab
+	•	aktualisiert existierende Workouts
+	•	erstellt neue Workouts via Bulk-Upload
+	•	zeigt Fehler und gesendete Daten sauber an
+
+⸻
+
+6️⃣ Erfolg prüfen in Intervals.icu
+
+Navigation:
+
+→ Calendar → Training
+
+Dort siehst du:
+	•	Titel
+	•	Description (inkl. Steps, Ramp, Intensität)
+	•	Startzeit
+	•	Struktur
+
+⸻
+
+7️⃣ Typische Fehler & Lösungen
+
+❌ 422 „Invalid Type“
+
+→ "sport" falsch geschrieben.
+Erlaubte Werte:
+	•	"Ride"
+	•	"Run"
+	•	"VirtualRow"
+	•	"Strength" / "WeightTraining"
+
+❌ Kein Event wird aktualisiert
+
+→ plan_id muss eindeutig sein
+→ und im Description-Feld der Events stehen.
+
+❌ Keine Steps sichtbar
+
+→ Intervals zeigt Steps nicht immer an
+→ wichtig: Die Description wird verwendet
+→ Steps im Payload trotzdem beibehalten (zukunftssicher).
+
+⸻
+
+📊 fetch_weekly_coach_data.py – Wozu dient dieses Script?
+
+Dieses Script holt alle relevanten Trainings- und Wellnessdaten der letzten 7 Tage aus Intervals.icu, und zwar kombiniert in einem einzigen strukturierten JSON, das perfekt geeignet ist, um:
+	•	deine Trainingsbelastung (CTL, ATL, RampRate)
+	•	Erholung (HRV, restingHR, Schlaf)
+	•	dein Gewicht
+	•	alle durchgeführten Aktivitäten (inkl. Power, HR, TL, NP, etc.)
+
+automatisch auszuwerten.
+
+Damit kann dein Coach-Script (oder ChatGPT) jederzeit wissen:
+	•	wie fit/ermüdet du bist
+	•	wie viel Trainingsstress du hattest
+	•	ob Intensitäten angepasst werden müssen
+	•	ob du überlastet oder unterfordert bist
+
+🔍 Was genau holt das Script?
+
+Für jeden Tag:
+
+Wellness-Daten:
+	•	CTL / ATL / RampRate
 	•	Gewicht
 	•	Ruhepuls
 	•	HRV
 	•	Schlafdauer + Schlafscore
-	•	Aktivitäten (inkl. NP, HR, TL, Device)
+	•	Aktualisierungszeit
 
-Script: fetch_weekly_coach_data.py
+Trainings pro Tag:
+	•	Trainingsart (Ride, Strength, Rowing…)
+	•	Dauer (moving_time)
+	•	Distanz
+	•	Höhenmeter
+	•	NP (normalized power)
+	•	Avg HR / Max HR
+	•	Training Load (TL / TSS)
+	•	Strain Score
+	•	Device Name (Garmin, C2, etc.)
 
-Ausgabe-Schema:
+📂 Ausgabeformat
 
-[
-  {
-    "date": "2025-12-05",
-    "wellness": {
-      "ctl": 25.91,
-      "atl": 30.46,
-      "rampRate": 0.65,
+Das Script erzeugt eine Datei:
+
+weekly_data.json
+
+Beispielstruktur:
+
+{
+  "date": "2025-12-05",
+  "wellness": {
+      "ctl": 25.9,
+      "atl": 30.4,
       "weight": 71.3,
       "resting_hr": 47,
       "hrv": 49,
       "sleep_hours": 7.2
-    },
-    "activities": [
+  },
+  "activities": [
       {
-        "id": "i110338643",
-        "name": "Krafttraining",
-        "type": "WeightTraining",
-        "avg_hr": 110,
-        "moving_s": 2663,
-        "np_est": null
+        "type": "Ride",
+        "duration_s": 4525,
+        "training_load": 81,
+        "np_est": 178,
+        "avg_hr": 130,
+        "max_hr": 165
       }
-    ]
-  }
-]
+  ]
+}
 
-Dieses Dataset dient als Grundlage für:
-	•	automatische Trainingsanpassung
-	•	Belastungssteuerung
-	•	Tagesform-Erkennung
+🎯 Wofür ist das nützlich?
+	•	Adaptive Trainingssteuerung (z. B. GPT entscheidet über RPE, Wattvorgaben)
+	•	Erholung überwachen (HRV/RestingHR/CTL/ATL)
+	•	Automatisierte Plan-Anpassung
+	•	Verhindert Überlastung
+	•	Objektive Leistungsentwicklung
 
-⸻
-
-🧪 6. Upsert-Logik
-
-Wenn Event vorhanden:
-
-→ PUT /events/{id}
-
-Wenn nicht vorhanden:
-
-→ Bulk-Upload via POST:
-
-POST /events/bulk
-
-
-⸻
-
-🏷 PLAN-ID Matching
-
-In jeder Beschreibung steht:
-
-[PLAN-ID:2026-03-06-VO2-5x3]
-
-Der Algorithmus:
-	1.	Alle Events im Zeitraum abrufen
-	2.	PLAN-ID extrahieren
-	3.	Exakt matchen
-	4.	Update statt Doppelung
-
-Damit passiert nie, dass Trainings doppelt erzeugt werden.
-
-⸻
-
-📥 7. Schritte-Format (Description)
-
-Wird automatisch generiert:
-
-- 10m in Z2 85rpm
-- 3m in Z5 95-100rpm
-- 3m in Z2 Free
-
-Kein Klammernformat, Intervals.icu-kompatibel.
-
-⸻
-
-📤 8. Lade Trainings hoch
-
-Einfach:
-
-python3 upload_plan_to_intervals.py
-
-
-⸻
-
-📅 9. Neue Trainings hinzufügen
-
-.json ins trainings/ Verzeichnis legen.
-
-Der Upload erkennt automatisch:
-	•	nur zukünftige Einheiten
-	•	PLAN-ID Matching
-	•	Upsert
-
-⸻
-
-📌 10. Bekannte Einschränkungen
-	•	Intervals.icu erlaubt keine eigenen Höhenmeterfelder → Höhenziele stehen in der Beschreibung.
-	•	“Strength” muss als "WeightTraining" gemappt werden.
-	•	“steps” werden in Intervals angezeigt, aber nicht im Workout-Builder editierbar (API-Limit).
-
-⸻
-
-✔ Fertig
-
-Dies ist die dokumentierte & stabile Version deines Automatisierungssystems.
-Wenn du möchtest, kann ich noch ergänzen:
-	•	Diagramm der Pipeline
-	•	Beispiel-Videos
-	•	Test-Suite
-	•	GitHub-Repository-Skelett
-
-Sag einfach Bescheid!
