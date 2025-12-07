@@ -1,0 +1,835 @@
+[
+  {
+    "date": "2026-03-02",
+    "plan_id": "2026-03-02-GA1-120",
+    "name": "GA1 locker 120min",
+    "type": "Ride",
+    "moving_time": 7200,
+    "steps": [
+      {
+        "duration": "120m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lockere GA1-Ausfahrt, 60–68% FTP",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-03",
+    "plan_id": "2026-03-03-SST-3x8",
+    "name": "Sweetspot 3×8min",
+    "type": "Ride",
+    "moving_time": 4500,
+    "steps": [
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "8m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 1 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "8m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 2 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "8m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 3 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "11m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-04",
+    "plan_id": "2026-03-04-GA1-150",
+    "name": "GA1 locker 150min",
+    "type": "Ride",
+    "moving_time": 9000,
+    "steps": [
+      {
+        "duration": "150m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Längere GA1-Ausfahrt, ruhig im Sitzen klettern",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-06",
+    "plan_id": "2026-03-06-VO2-5x3",
+    "name": "VO2max 5×3min",
+    "type": "Ride",
+    "moving_time": 4500,
+    "steps": [
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 1 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 2 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 3 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 3 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 4 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 4 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 5 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-07",
+    "plan_id": "2026-03-07-GA1-180",
+    "name": "Lange GA1-Ausfahrt 3h",
+    "type": "Ride",
+    "moving_time": 10800,
+    "steps": [
+      {
+        "duration": "180m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lange GA1-Ausfahrt, gern mit Anstiegen, aber ohne Vollgas",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-09",
+    "plan_id": "2026-03-09-GA1-150",
+    "name": "GA1 locker 150min",
+    "type": "Ride",
+    "moving_time": 9000,
+    "steps": [
+      {
+        "duration": "150m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "GA1-Ausfahrt, gern welliges Gelände",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-10",
+    "plan_id": "2026-03-10-SST-3x10",
+    "name": "Sweetspot 3×10min",
+    "type": "Ride",
+    "moving_time": 5400,
+    "steps": [
+      {
+        "duration": "20m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 1 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 2 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 3 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-11",
+    "plan_id": "2026-03-11-GA1-180",
+    "name": "GA1 locker 180min",
+    "type": "Ride",
+    "moving_time": 10800,
+    "steps": [
+      {
+        "duration": "180m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lange GA1-Ausfahrt, Tempo konsequent im Grundlagenbereich",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-13",
+    "plan_id": "2026-03-13-VO2-6x3",
+    "name": "VO2max 6×3min",
+    "type": "Ride",
+    "moving_time": 5400,
+    "steps": [
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 1 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 2 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 3 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 3 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 4 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 4 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 5 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 5 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 6 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-14",
+    "plan_id": "2026-03-14-GA1-210",
+    "name": "Lange GA1-Ausfahrt 3½h",
+    "type": "Ride",
+    "moving_time": 12600,
+    "steps": [
+      {
+        "duration": "210m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lange GA1-Ausfahrt, gern bergig (Neusiedlersee-ähnliche Belastung vorbereiten)",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-16",
+    "plan_id": "2026-03-16-GA1-180",
+    "name": "GA1 locker 180min",
+    "type": "Ride",
+    "moving_time": 10800,
+    "steps": [
+      {
+        "duration": "180m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Konstante GA1-Ausfahrt, lieber länger als härter",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-17",
+    "plan_id": "2026-03-17-SST-4x10",
+    "name": "Sweetspot 4×10min",
+    "type": "Ride",
+    "moving_time": 6300,
+    "steps": [
+      {
+        "duration": "20m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 1 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 2 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 3 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 3 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 4 Sweetspot",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-18",
+    "plan_id": "2026-03-18-GA1-210",
+    "name": "GA1 locker 210min",
+    "type": "Ride",
+    "moving_time": 12600,
+    "steps": [
+      {
+        "duration": "210m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lange GA1+, gern mit längeren Anstiegen wie im Dreiländergiro",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-20",
+    "plan_id": "2026-03-20-VO2-7x3",
+    "name": "VO2max 7×3min",
+    "type": "Ride",
+    "moving_time": 6000,
+    "steps": [
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 1 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 2 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 3 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 3 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 4 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 4 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 5 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 5 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 6 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 6 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 7 VO2max",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-21",
+    "plan_id": "2026-03-21-GA1-240",
+    "name": "Lange GA1-Ausfahrt 4h",
+    "type": "Ride",
+    "moving_time": 14400,
+    "steps": [
+      {
+        "duration": "240m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Sehr lange GA1, bergig wenn möglich, aber keine All-out-Klettereien",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-23",
+    "plan_id": "2026-03-23-GA1-150",
+    "name": "GA1 locker 150min",
+    "type": "Ride",
+    "moving_time": 9000,
+    "steps": [
+      {
+        "duration": "150m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lockerere GA1-Ausfahrt mit einigen kürzeren Anstiegen",
+        "intensity": "active"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-24",
+    "plan_id": "2026-03-24-SST-3x10-light",
+    "name": "Sweetspot light 3×10min",
+    "type": "Ride",
+    "moving_time": 5400,
+    "steps": [
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 1 Sweetspot light",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 2 Sweetspot light",
+        "intensity": "active"
+      },
+      {
+        "duration": "5m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "SS",
+        "cadence": "90rpm",
+        "description": "Intervall 3 Sweetspot light",
+        "intensity": "active"
+      },
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-25",
+    "plan_id": "2026-03-25-GA1-150",
+    "name": "GA1 locker 150min",
+    "type": "Ride",
+    "moving_time": 9000,
+    "steps": [
+      {
+        "duration": "150m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Letzte längere GA1 vor Mallorca, bewusst entspannt fahren",
+        "intensity": "warmup",
+        "ramp": true
+      }
+    ]
+  },
+  {
+    "date": "2026-03-27",
+    "plan_id": "2026-03-27-VO2-5x3-light",
+    "name": "VO2max 5×3min light",
+    "type": "Ride",
+    "moving_time": 4200,
+    "steps": [
+      {
+        "duration": "15m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Aufwärmen",
+        "intensity": "warmup",
+        "ramp": true
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 1 VO2max light",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 1 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 2 VO2max light",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 2 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 3 VO2max light",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 3 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 4 VO2max light",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Pause 4 locker",
+        "intensity": "active"
+      },
+      {
+        "duration": "3m",
+        "zone": "Z5",
+        "cadence": "95-100rpm",
+        "description": "Intervall 5 VO2max light",
+        "intensity": "active"
+      },
+      {
+        "duration": "10m",
+        "zone": "Z1",
+        "cadence": "Free",
+        "description": "Cooldown",
+        "intensity": "cooldown"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-28",
+    "plan_id": "2026-03-28-GA1-210",
+    "name": "Lange GA1-Ausfahrt 3½h",
+    "type": "Ride",
+    "moving_time": 12600,
+    "steps": [
+      {
+        "duration": "210m",
+        "zone": "Z2",
+        "cadence": "Free",
+        "description": "Lange, aber nicht zu harte GA1-Ausfahrt als Vorbereitung auf Mallorca",
+        "intensity": "active"
+      }
+    ]
+  }
+]
