@@ -9,7 +9,8 @@ config = load_config()
 API_KEY = config["api_key"]
 ATHLETE_ID = config["athlete_id"]
 BASE_URL = config["base_url"]
-PLAN_FILE = config["paths"]["plan_file"]
+PLAN_FILE = config["paths"].get("plan_file")
+PLAN_DIR = config["paths"].get("plan_dir")
 DEFAULT_START_TIME = config.get("default_start_time", "17:00:00")
 
 # Marker-Format in der Beschreibung für Matching
@@ -22,28 +23,98 @@ def auth():
     return ("API_KEY", API_KEY)
 
 
-def load_plan(path: str):
+def load_plan_file(path: str):
+    """
+    Lädt einen einzelnen Plan aus einer JSON-Datei.
+    Erwartet eine Liste von Workouts oder ein Dict mit 'trainings'.
+    """
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"Plan-Datei nicht gefunden: {path}")
     with p.open("r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict) and "trainings" in data:
+        return data["trainings"]
+
+    raise ValueError(f"Unbekanntes JSON-Format in {path}")
 
 
-def get_date_range_from_plan(plan):
+def load_all_workouts() -> list[dict]:
+    """
+    Lädt Workouts aus:
+    - allen JSON-Dateien in PLAN_DIR (falls gesetzt)
+    - ansonsten aus PLAN_FILE
+
+    Filtert anschließend alle Workouts < HEUTE heraus.
+    """
+    workouts: list[dict] = []
+
+    if PLAN_DIR:
+        d = Path(PLAN_DIR)
+        if not d.exists():
+            raise FileNotFoundError(
+                f"Trainingsverzeichnis nicht gefunden: {PLAN_DIR}")
+
+        json_files = sorted(d.glob("*.json"))
+        if not json_files:
+            print(f"Keine .json-Dateien in {PLAN_DIR} gefunden.")
+        else:
+            print(
+                f"Lade Workouts aus {len(json_files)} Dateien in {PLAN_DIR} ...")
+        for jf in json_files:
+            try:
+                file_data = load_plan_file(str(jf))
+                if not isinstance(file_data, list):
+                    print(f"Überspringe {jf}: kein Array von Workouts")
+                    continue
+                workouts.extend(file_data)
+            except Exception as e:
+                print(f"Fehler beim Laden von {jf}: {e}")
+    else:
+        # Fallback: einzelnes Plan-File wie bisher
+        if not PLAN_FILE:
+            raise RuntimeError(
+                "Weder plan_dir noch plan_file in config.paths gesetzt.")
+        print(f"Lade Workouts aus Plan-Datei: {PLAN_FILE}")
+        workouts = load_plan_file(PLAN_FILE)
+
+    # Filter: nur Workouts ab heute
+    today = datetime.date.today()
+    filtered: list[dict] = []
+    for w in workouts:
+        date_str = w.get("date")
+        if not date_str:
+            continue
+        try:
+            d = datetime.date.fromisoformat(date_str)
+        except Exception:
+            print(f"Ungültiges Datum im Workout (wird ignoriert): {date_str}")
+            continue
+        if d >= today:
+            filtered.append(w)
+
+    print(
+        f"Gefundene Workouts gesamt: {len(workouts)}, davon ab heute: {len(filtered)}")
+    return filtered
+
+
+def get_date_range_from_plan(plan: list[dict]):
     dates = [datetime.date.fromisoformat(w["date"]) for w in plan]
     return min(dates), max(dates)
 
 
 def map_sport_to_event_type(sport: str) -> str:
     """
-    Mappt unser internes 'sport'-Feld auf einen gültigen Intervals.icu-Eventtyp.
+    Mappt unser internes 'sport'/'type'-Feld auf einen gültigen Intervals.icu-Eventtyp.
     """
     s = (sport or "").lower()
 
     if s == "ride":
         return "Ride"
-    if s in ("strength", "gym", "kraft"):
+    if s in ("strength", "gym", "kraft", "weighttraining"):
         return "WeightTraining"
     if s in ("virtualrow", "row", "rowing"):
         return "VirtualRow"
@@ -52,6 +123,7 @@ def map_sport_to_event_type(sport: str) -> str:
 
     # Fallback – sicherer generischer Typ
     return "Workout"
+
 
 def fetch_existing_events(start_date: datetime.date, end_date: datetime.date):
     """
@@ -97,7 +169,7 @@ def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
     [PLAN-ID:...]
     - 10m in Z2 85rpm
     - 3m in Z5 95rpm
-    - 3m in Z4 90-100rpm
+    - 3m in SS 90-100rpm
     - 10m in Z1 Free
     """
     lines: list[str] = []
@@ -115,15 +187,16 @@ def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
             continue
 
         # Basis: "- 3m in Z5"
-        line = f"- {dur} {zone}"
+        line = f"- {dur} in {zone}"
 
-        # Kadenz einfach anhängen – ohne Klammern, auch Bereiche wie "90-100rpm"
+        # Kadenz anhängen – ohne Klammern, auch Bereiche wie "90-100rpm"
         if cadence:
             line += f" {cadence}"
 
         lines.append(line)
 
     return "\n".join(lines).strip()
+
 
 def extract_plan_id_from_description(description: str | None) -> str | None:
     """
@@ -148,13 +221,16 @@ def extract_plan_id_from_description(description: str | None) -> str | None:
 def build_event_payload(workout: dict) -> dict:
     """
     Baut den Payload für ein Intervals.icu-Event aus einem Plan-Eintrag.
+    WICHTIG:
+    - Description im Format "- 10m in Z2 85rpm" aus steps
+    - moving_time aus steps bzw. aus duration/moving_time im Plan
     """
     date = workout["date"]
     start_date_local = f"{date}T{DEFAULT_START_TIME}"
 
     steps = workout.get("steps", []) or []
 
-    # moving_time wie im GitHub-Script: Summe der Step-Dauern
+    # moving_time: Summe der Step-Dauern, sonst Fallback
     if steps:
         total_secs = 0
         for s in steps:
@@ -174,7 +250,7 @@ def build_event_payload(workout: dict) -> dict:
     category = workout.get("category", "WORKOUT")
     plan_id = workout["plan_id"]
 
-    # sport entweder aus 'sport' (alte Struktur) oder aus 'type' (neue v4 JSON)
+    # sport entweder aus 'sport' (alte Struktur) oder aus 'type' (neue Struktur)
     raw_sport = workout.get("sport") or workout.get("type") or ""
 
     description = build_description_with_steps(plan_id, steps)
@@ -186,7 +262,7 @@ def build_event_payload(workout: dict) -> dict:
         "description": description,
         "type": map_sport_to_event_type(raw_sport),
         "moving_time": moving_time,
-        "steps": steps,
+        "steps": steps,  # optional – Intervals.icu ignoriert das ggf., aber schadet nicht
     }
 
     return payload
@@ -209,8 +285,12 @@ def index_events_by_plan_id_from_description(events: list[dict]) -> dict[str, di
 
 
 def upsert_plan(plan: list[dict]):
+    if not plan:
+        print("Kein Workout im Plan (ab heute) – nichts zu tun.")
+        return
+
     start_date, end_date = get_date_range_from_plan(plan)
-    print(f"Datumsbereich im Plan: {start_date} bis {end_date}")
+    print(f"Datumsbereich im Plan (ab heute): {start_date} bis {end_date}")
 
     print("Lade existierende Events aus Intervals.icu ...")
     existing_events = fetch_existing_events(start_date, end_date)
@@ -266,8 +346,8 @@ def upsert_plan(plan: list[dict]):
 
 
 def main():
-    plan = load_plan(PLAN_FILE)
-    print(f"{len(plan)} Einheiten im Plan.")
+    plan = load_all_workouts()
+    print(f"{len(plan)} Einheiten im Plan (ab heute).")
     upsert_plan(plan)
 
 
