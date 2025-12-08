@@ -123,6 +123,7 @@ def fetch_wellness(start_date, end_date):
             "sleep_score": w.get("sleepScore"),
             "sleep_quality": w.get("sleepQuality"),
             "avg_sleeping_hr": w.get("avgSleepingHR"),
+            "steps": w.get("steps"), 
             "updated": w.get("updated"),
         }
 
