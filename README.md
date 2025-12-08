@@ -14,6 +14,94 @@ Both programs use the shared configuration file `config.json`.
 
 ---
 
+## Quickinstalltion
+
+## macOS (Terminal / zsh / bash)
+
+```bash
+git --version
+python3 --version || brew install python
+mkdir -p ~/projects
+cd ~/projects
+git clone https://github.com/fohnbit/intervals.icu-training.git
+cd intervals.icu-training
+mv config.json.default config.json
+nano config.json
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+python3 weekly_coach_data.py
+```
+
+## Windows (Powershell)
+
+```powershell
+# -------------------------------------------
+# Check if Git is installed
+# Prüfen ob Git installiert ist
+git --version
+
+# Check if Python is installed
+# Prüfen ob Python installiert ist
+python --version
+
+# If Python is missing, install from:
+# Falls Python fehlt, installieren von:
+# https://www.python.org/downloads/windows/
+# IMPORTANT: Enable "Add Python to PATH" during installation
+# WICHTIG: Beim Installieren "Add Python to PATH" aktivieren!
+
+# -------------------------------------------
+# Create project folder
+# Projektordner anlegen
+mkdir C:\projects
+cd C:\projects
+
+# -------------------------------------------
+# Clone the repository
+# Repository klonen
+git clone https://github.com/fohnbit/intervals.icu-training.git
+cd intervals.icu-training
+
+# -------------------------------------------
+# Copy and edit configuration file
+# Beispiel-Config übernehmen und bearbeiten
+mv config.json.default config.json
+
+# Open config.json for editing
+# config.json zum Bearbeiten öffnen
+notepad config.json
+
+# -------------------------------------------
+# Create Python virtual environment
+# Virtuelle Python-Umgebung erstellen
+python -m venv venv
+
+# If PowerShell blocks script execution:
+# Falls PowerShell die Ausführung blockiert:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+# Activate venv
+# venv aktivieren
+.\venv\Scripts\Activate.ps1
+
+# -------------------------------------------
+# Upgrade pip
+# pip aktualisieren
+pip install --upgrade pip
+
+# Install required dependencies
+# Benötigte Abhängigkeiten installieren
+pip install -r requirements.txt
+
+# -------------------------------------------
+# First script execution (default: last 7 days)
+# Erstes Ausführen (Standard: letzte 7 Tage)
+python weekly_coach_data.py
+```
+
 ## Installation
 
 Install all required Python dependencies:

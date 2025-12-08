@@ -12,6 +12,71 @@ Alle Programme verwenden die gemeinsame Konfiguration `config.json`.
 
 ---
 
+## Quickinstalltion
+
+## macOS (Terminal / zsh / bash)
+
+```bash
+git --version
+python3 --version || brew install python
+mkdir -p ~/projects
+cd ~/projects
+git clone https://github.com/fohnbit/intervals.icu-training.git
+cd intervals.icu-training
+mv config.json.default config.json
+nano config.json
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+python3 weekly_coach_data.py
+```
+
+## Windows (Powershell)
+
+```powershell
+# Prüfen ob Git installiert ist
+git --version
+
+# Prüfen ob Python installiert ist
+python --version
+
+# Falls Python fehlt → von python.org installieren
+# https://www.python.org/downloads/windows/
+# und bei Installation unbedingt "Add Python to PATH" aktivieren!
+
+# Projektordner anlegen
+mkdir C:\projects
+cd C:\projects
+
+# Repository klonen
+git clone https://github.com/fohnbit/intervals.icu-training.git
+cd intervals.icu-training
+
+# Beispiel-Config übernehmen und bearbeiten
+mv config.json.default config.json
+notepad config.json
+
+# Virtuelle Python-Umgebung erstellen
+python -m venv venv
+
+# Falls Skript-Ausführung gesperrt ist, temporär erlauben:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+# venv aktivieren
+.\venv\Scripts\Activate.ps1
+
+# Pip aktualisieren
+pip install --upgrade pip
+
+# Abhängigkeiten installieren
+pip install -r requirements.txt
+
+# Erstes Ausführen
+python weekly_coach_data.py
+```
+
 ## Installation
 
 Installiere die benötigten Python-Abhängigkeiten:
