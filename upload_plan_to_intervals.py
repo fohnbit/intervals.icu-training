@@ -3,6 +3,7 @@ import json
 import datetime
 from pathlib import Path
 from config_loader import load_config
+import argparse
 
 config = load_config()
 
@@ -26,14 +27,7 @@ def auth():
 def load_plan_file(path: str):
     """
     Lädt einen einzelnen Plan aus einer JSON-Datei.
-    Erwartet:
-    - eine Liste von Workouts (unser aktuelles Format), ODER
-    - ein Dict mit 'trainings' (kompatibel zum GitHub-Beispiel).
-
-    Die Workouts selbst enthalten bereits:
-    - steps mit duration, zone, cadence, description
-    - optional intensity, ramp, ...
-    Diese Felder werden später 1:1 an Intervals.icu durchgereicht.
+    Erwartet eine Liste von Workouts oder ein Dict mit 'trainings'.
     """
     p = Path(path)
     if not p.exists():
@@ -71,7 +65,8 @@ def load_all_workouts() -> list[dict]:
             print(f"Keine .json-Dateien in {PLAN_DIR} gefunden.")
         else:
             print(
-                f"Lade Workouts aus {len(json_files)} Dateien in {PLAN_DIR} ...")
+                f"Lade Workouts aus {len(json_files)} Dateien in {PLAN_DIR} ..."
+            )
         for jf in json_files:
             try:
                 file_data = load_plan_file(str(jf))
@@ -172,20 +167,16 @@ def convert_duration(duration: str) -> int:
         return int(float(duration))
 
 
-def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
+def build_description_with_steps(plan_id: str, user_description: str | None, steps: list[dict]) -> str:
     """
     Baut die description im gewünschten Stil:
 
     [PLAN-ID:...]
+    <Beschreibung aus JSON>
     - 15m ramp Z1 Free intensity=warmup
     - 8m SS 90rpm intensity=active
     - 5m Z1 Free intensity=recovery
-    ...
-
-    Regeln:
-    - kein "in" mehr
-    - "ramp" kommt direkt nach der Dauer, falls im Step gesetzt
-    - intensity wird als "intensity=<wert>" angehängt, falls vorhanden
+    - 10m Z1 Free intensity=cooldown
     """
     lines: list[str] = []
 
@@ -193,36 +184,49 @@ def build_description_with_steps(plan_id: str, steps: list[dict]) -> str:
     if plan_id:
         lines.append(f"{PLAN_MARKER_PREFIX}{plan_id}{PLAN_MARKER_SUFFIX}")
 
+    # Beschreibung aus dem JSON (falls vorhanden)
+    if user_description:
+        user_description = user_description.strip()
+        if user_description:
+            # Leere Zeile zur optischen Trennung
+            if lines:
+                lines.append("")
+            lines.append(user_description)
+
+    # Noch eine Leerzeile, bevor die Steps kommen (optional)
+    if lines and steps:
+        lines.append("")
+
+    # Steps
     for step in steps:
         dur = (step.get("duration") or "").strip()
         zone = (step.get("zone") or "").strip()
         cadence = (step.get("cadence") or "").strip()
         intensity = (step.get("intensity") or "").strip()
-        ramp_flag = bool(step.get("ramp"))
+        ramp = step.get("ramp", False)
 
         if not dur:
             continue
 
-        # Basis: "- 15m"
-        line_parts = [f"- {dur}"]
+        # Basis: "- 3m Z5"
+        line = f"- {dur}"
 
         # ramp direkt nach der Zeit
-        if ramp_flag:
-            line_parts.append("ramp")
+        if ramp:
+            line += " ramp"
 
-        # Zone (SS, Z1, Z2, Z3, Z5, ...)
+        # Zone anhängen (Z1, Z2, SS, Z5 ...)
         if zone:
-            line_parts.append(zone)
+            line += f" {zone}"
 
-        # Kadenz (inkl. Bereiche wie 90-100rpm oder "Free")
+        # Kadenz ohne Klammern, auch Bereiche wie "90-100rpm"
         if cadence:
-            line_parts.append(cadence)
+            line += f" {cadence}"
 
-        # intensity hinten anhängen
+        # intensity als "intensity=..."
         if intensity:
-            line_parts.append(f"intensity={intensity}")
+            line += f" intensity={intensity}"
 
-        line = " ".join(line_parts)
         lines.append(line)
 
     return "\n".join(lines).strip()
@@ -251,9 +255,8 @@ def build_event_payload(workout: dict) -> dict:
     """
     Baut den Payload für ein Intervals.icu-Event aus einem Plan-Eintrag.
     WICHTIG:
-    - Description im Format "- 10m in Z2 85rpm" aus steps
-    - moving_time aus steps bzw. aus duration/moving_time im Plan
-    - steps werden 1:1 übernommen, inkl. intensity, ramp, etc.
+    - Description mit PLAN-ID, JSON-Beschreibung und Steps
+    - moving_time aus Steps bzw. Fallback aus duration/moving_time im Plan
     """
     date = workout["date"]
     start_date_local = f"{date}T{DEFAULT_START_TIME}"
@@ -272,10 +275,7 @@ def build_event_payload(workout: dict) -> dict:
     else:
         if "moving_time" in workout and workout["moving_time"] is not None:
             moving_time = int(workout["moving_time"])
-        elif (
-            "duration_minutes" in workout
-            and workout["duration_minutes"] is not None
-        ):
+        elif "duration_minutes" in workout and workout["duration_minutes"] is not None:
             moving_time = int(round(workout["duration_minutes"] * 60))
         else:
             moving_time = None
@@ -286,7 +286,12 @@ def build_event_payload(workout: dict) -> dict:
     # sport entweder aus 'sport' (alte Struktur) oder aus 'type' (neue Struktur)
     raw_sport = workout.get("sport") or workout.get("type") or ""
 
-    description = build_description_with_steps(plan_id, steps)
+    # <- Beschreibung aus deinem JSON (z. B. "GA1 locker, in der Mitte 3x3' SS")
+    user_description = workout.get("description", "")
+
+    # <- jetzt mit PLAN-ID + Beschreibung + Steps
+    description = build_description_with_steps(
+        plan_id, user_description, steps)
 
     payload = {
         "start_date_local": start_date_local,
@@ -295,16 +300,12 @@ def build_event_payload(workout: dict) -> dict:
         "description": description,
         "type": map_sport_to_event_type(raw_sport),
         "moving_time": moving_time,
-        # Hier werden intensity / ramp etc. automatisch mitgeschickt
-        "steps": steps,
+        "steps": steps,  # Intervals ignoriert es evtl., schadet aber nicht
     }
 
     return payload
 
-
-def index_events_by_plan_id_from_description(
-    events: list[dict],
-) -> dict[str, dict]:
+def index_events_by_plan_id_from_description(events: list[dict]) -> dict[str, dict]:
     """
     Erstellt ein Dict: plan_id -> Event
     indem die PLAN-ID aus der description extrahiert wird.
@@ -320,7 +321,41 @@ def index_events_by_plan_id_from_description(
     return by_plan_id
 
 
-def upsert_plan(plan: list[dict]):
+def delete_plan_events_in_range(start_date: datetime.date, end_date: datetime.date):
+    """
+    Löscht alle Events im Datumsbereich, die eine PLAN-ID in der
+    description tragen. Echte aufgezeichnete Aktivitäten bleiben unangetastet.
+    """
+    print(
+        f"⚠️  Lösche vorhandene PLAN-Events mit PLAN-ID zwischen {start_date} und {end_date} ..."
+    )
+    events = fetch_existing_events(start_date, end_date)
+    to_delete = []
+
+    for e in events:
+        desc = e.get("description") or ""
+        if PLAN_MARKER_PREFIX in desc:
+            to_delete.append(e)
+
+    if not to_delete:
+        print("Keine Events mit PLAN-ID im Bereich gefunden – nichts zu löschen.")
+        return
+
+    print(f"Es werden {len(to_delete)} Events mit PLAN-ID gelöscht ...")
+    for e in to_delete:
+        event_id = e["id"]
+        url = f"{BASE_URL}/athlete/{ATHLETE_ID}/events/{event_id}"
+        resp = requests.delete(url, auth=auth(), timeout=30)
+        if not resp.ok:
+            print(f"❌ Fehler beim Löschen von Event {event_id}")
+            print("Status:", resp.status_code)
+            print("Antwort:", resp.text)
+            # nicht abbrechen, sondern weiter versuchen
+        else:
+            print(f"  ✅ Event {event_id} gelöscht")
+
+
+def upsert_plan(plan: list[dict], wipe_plan_range: bool = False):
     if not plan:
         print("Kein Workout im Plan (ab heute) – nichts zu tun.")
         return
@@ -328,13 +363,20 @@ def upsert_plan(plan: list[dict]):
     start_date, end_date = get_date_range_from_plan(plan)
     print(f"Datumsbereich im Plan (ab heute): {start_date} bis {end_date}")
 
-    print("Lade existierende Events aus Intervals.icu ...")
-    existing_events = fetch_existing_events(start_date, end_date)
-    events_by_plan_id = index_events_by_plan_id_from_description(
-        existing_events)
-    print(
-        f"Gefundene Events mit PLAN-ID in description: {len(events_by_plan_id)}"
-    )
+    if wipe_plan_range:
+        # erst alles mit PLAN-ID im Bereich löschen
+        delete_plan_events_in_range(start_date, end_date)
+        existing_events = []  # danach ist der Bereich bzgl. PLAN-Events leer
+        events_by_plan_id = {}
+    else:
+        print("Lade existierende Events aus Intervals.icu ...")
+        existing_events = fetch_existing_events(start_date, end_date)
+        events_by_plan_id = index_events_by_plan_id_from_description(
+            existing_events
+        )
+        print(
+            f"Gefundene Events mit PLAN-ID in description: {len(events_by_plan_id)}"
+        )
 
     new_events_payloads = []
     updated = 0
@@ -385,9 +427,22 @@ def upsert_plan(plan: list[dict]):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Upload von Trainingsplänen nach Intervals.icu"
+    )
+    parser.add_argument(
+        "--wipe-plan-range",
+        action="store_true",
+        help=(
+            "Löscht vor dem Upload alle Events im Datumsbereich, "
+            "die eine PLAN-ID in der description haben."
+        ),
+    )
+    args = parser.parse_args()
+
     plan = load_all_workouts()
     print(f"{len(plan)} Einheiten im Plan (ab heute).")
-    upsert_plan(plan)
+    upsert_plan(plan, wipe_plan_range=args.wipe_plan_range)
 
 
 if __name__ == "__main__":

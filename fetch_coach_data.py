@@ -1,6 +1,7 @@
 import requests
 import datetime
 import json
+import argparse
 from config_loader import load_config
 
 config = load_config()
@@ -16,6 +17,10 @@ def auth():
 
 
 def get_date_range(days=7):
+    """
+    Standardverhalten: letzte `days` Tage bis heute.
+    (Wie bisher genutzt.)
+    """
     today = datetime.date.today()
     start = today - datetime.timedelta(days=days)
     return start, today
@@ -144,8 +149,50 @@ def combine_coach_data(activities, wellness_by_date, start_date, end_date):
     return combined
 
 
+def parse_cli_date(date_str: str) -> datetime.date:
+    """
+    Erwartet TT-MM-YYYY, z.B. 01-03-2025.
+    """
+    try:
+        return datetime.datetime.strptime(date_str, "%d-%m-%Y").date()
+    except ValueError:
+        raise ValueError(
+            f"Ungültiges Datum '{date_str}'. Erwartetes Format: TT-MM-YYYY, z.B. 01-03-2025."
+        )
+
+
 def main():
-    start, end = get_date_range(7)
+    parser = argparse.ArgumentParser(
+        description="Hole Aktivitäten + Wellness aus Intervals.icu und speichere sie als JSON."
+    )
+    parser.add_argument(
+        "--start", "-s",
+        help="Startdatum im Format TT-MM-YYYY (z.B. 01-03-2025)."
+    )
+    parser.add_argument(
+        "--days", "-d",
+        type=int,
+        help="Anzahl der Tage (Standard: 7)."
+    )
+    args = parser.parse_args()
+
+    # Standardwert für Tage
+    days = args.days if (args.days and args.days > 0) else 7
+
+    if args.start:
+        # explizites Startdatum + (optional) Tage
+        try:
+            start = parse_cli_date(args.start)
+        except ValueError as e:
+            print(e)
+            return
+
+        # end = start + (days - 1) → genau 'days' Tage
+        end = start + datetime.timedelta(days=days - 1)
+    else:
+        # kein Startdatum → wie bisher (letzte N Tage, default 7)
+        start, end = get_date_range(days)
+
     print(f"Zeitraum: {start} bis {end}")
 
     print("Hole Aktivitäten...")
