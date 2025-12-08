@@ -1,6 +1,6 @@
 # Intervals.icu Training Uploader & Coach Data Fetcher
 
-**Languages:** English | [Deutsch](README.md)
+**Languages:** English | [Deutsch](README.de.md)
 
 This project contains two Python programs:
 
