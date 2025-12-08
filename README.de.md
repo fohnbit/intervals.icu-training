@@ -1,22 +1,20 @@
 # Intervals.icu Training Uploader & Coach Data Fetcher
 
-**Languages:** English | [Deutsch](README.md)
-
-This project contains two Python programs:
+Dieses Projekt besteht aus zwei Python-Programmen:
 
 1. **`upload_plan_to_intervals.py`**  
-   Uploads training plans from JSON files to Intervals.icu and automatically updates existing entries.
+   Lädt Trainingspläne aus JSON-Dateien in Intervals.icu hoch und aktualisiert bestehende Einträge automatisch.
 
 2. **`fetch_weekly_coach_data.py`**  
-   Fetches wellness and training data from the last 7 days — ideal for adaptive training guidance.
+   Ruft Wellness- und Trainingsdaten der letzten 7 Tage ab — ideal für adaptive Trainingssteuerung.
 
-Both programs use the shared configuration file `config.json`.
+Alle Programme verwenden die gemeinsame Konfiguration `config.json`.
 
 ---
 
 ## Installation
 
-Install all required Python dependencies:
+Installiere die benötigten Python-Abhängigkeiten:
 
 ```bash
 pip install -r requirements.txt
@@ -24,13 +22,13 @@ pip install -r requirements.txt
 
 ---
 
-## Configuration
+## Konfiguration
 
-Edit **`config.json`** and add your Intervals.icu details:
+Bearbeite die Datei **`config.json`** und trage deine Daten ein:
 
 ```json
 {
-  "api_key": "YOUR_INTERVALS_API_KEY",
+  "api_key": "DEIN_INTERVALS_API_KEY",
   "athlete_id": "i12345",
   "base_url": "https://intervals.icu/api/v1",
 
@@ -44,31 +42,31 @@ Edit **`config.json`** and add your Intervals.icu details:
 }
 ```
 
-### Important
+### Wichtig:
 
-- `api_key`: your Intervals.icu API key  
-- `athlete_id`: e.g. `i33675`  
-- `plan_dir`: folder containing multiple training plan files  
-- `plan_file`: alternative single file  
-- `default_start_time`: default start time for newly created workouts  
-- `weekly_output`: output file for wellness/activity data  
-
----
-
-# Usage
+- `api_key`: Dein Intervals.icu API-Key  
+- `athlete_id`: z. B. `i33675`  
+- `plan_dir`: Ordner mit mehreren Trainingsdateien  
+- `plan_file`: Alternative Einzeldatei  
+- `default_start_time`: Uhrzeit, zu der Workouts angelegt werden  
+- `weekly_output`: Datei für Wellness/Aktivitäten  
 
 ---
 
-## 1. Upload training plans to Intervals.icu  
+# Nutzung
+
+---
+
+## 1. Trainingspläne in Intervals.icu hochladen  
 ### Script: `upload_plan_to_intervals.py`
 
-This script:
+Das Script:
 
-- loads all `.json` files inside the training directory  
-- imports only workouts **from today onward**  
-- creates new Intervals.icu events  
-- updates existing events using their `PLAN-ID`  
-- generates structured descriptions:
+- lädt alle `.json`-Dateien im Trainingsordner  
+- importiert nur Workouts **ab heutigem Datum**  
+- erstellt neue Intervals-Events  
+- aktualisiert bestehende Events anhand der `PLAN-ID`  
+- erzeugt strukturierte Beschreibungseinträge:
 
 ```
 [PLAN-ID:2026-02-04-SST-3x8]
@@ -79,7 +77,7 @@ This script:
 - 11m Z1 Free intensity=cooldown
 ```
 
-### Example training file:
+### Beispiel-Trainingsdatei:
 
 ```json
 [
@@ -98,7 +96,7 @@ This script:
 ]
 ```
 
-### Run the upload:
+### Upload starten:
 
 ```bash
 python3 upload_plan_to_intervals.py
@@ -106,10 +104,10 @@ python3 upload_plan_to_intervals.py
 
 ---
 
-## 2. Fetch last 7 days of wellness & activity data  
+## 2. Wellness- & Aktivitätsdaten der letzten 7 Tage abrufen  
 ### Script: `fetch_weekly_coach_data.py`
 
-The script generates output such as:
+Das Script erzeugt eine Datei wie:
 
 ```json
 {
@@ -134,7 +132,7 @@ The script generates output such as:
 }
 ```
 
-### Run the script:
+### Starten:
 
 ```bash
 python3 fetch_weekly_coach_data.py
@@ -144,8 +142,8 @@ python3 fetch_weekly_coach_data.py
 
 ## Contributing
 
-Pull requests are welcome.  
-For larger changes, please open an issue first.
+Pull Requests sind willkommen.  
+Für größere Änderungen bitte zuerst ein Issue eröffnen.
 
 ---
 
